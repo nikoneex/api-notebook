@@ -1,8 +1,20 @@
-/*
+/* API Notebook plugin styles */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.api-notebook-actions {
+	margin: 0.5em 0;
+}
 
-If your plugin does not need CSS, delete this file.
+.api-notebook-run-button {
+	margin-right: 0.5em;
+}
 
-*/
+.api-notebook-output pre.api-notebook-response,
+.api-notebook-output pre.api-notebook-error {
+	max-height: 20em;
+	overflow: auto;
+	white-space: pre-wrap;
+}
+
+.api-notebook-output pre.api-notebook-error {
+	color: var(--text-error);
+}
