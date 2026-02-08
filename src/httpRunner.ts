@@ -1,3 +1,4 @@
+import { requestUrl } from "obsidian";
 import type { ParsedRequest } from "./requestParser";
 
 export interface ResponseResult {
@@ -5,14 +6,6 @@ export interface ResponseResult {
 	statusText: string;
 	headers: Record<string, string>;
 	body: string;
-}
-
-function headersToRecord(headers: Headers): Record<string, string> {
-	const out: Record<string, string> = {};
-	headers.forEach((value, key) => {
-		out[key] = value;
-	});
-	return out;
 }
 
 function isJsonContentType(contentType: string): boolean {
@@ -32,32 +25,33 @@ function tryPrettyPrintJson(body: string, contentType: string): string {
 }
 
 export async function runHttpRequest(req: ParsedRequest): Promise<ResponseResult> {
-	const init: RequestInit = {
+	const param: { url: string; method?: string; headers?: Record<string, string>; body?: string; throw: boolean } = {
+		url: req.url,
 		method: req.method,
-		headers: req.headers,
+		headers: Object.keys(req.headers).length > 0 ? req.headers : undefined,
+		throw: false,
 	};
 	if (req.body !== undefined && req.method !== "GET") {
-		init.body = req.body;
+		param.body = req.body;
 	}
 
-	let response: Response;
+	let response: { status: number; headers: Record<string, string>; text: string };
 	try {
-		response = await fetch(req.url, init);
+		response = await requestUrl(param);
 	} catch (err) {
 		const message =
 			err instanceof Error ? err.message : String(err);
 		throw new Error(`[API Notebook] Request failed: ${message}`);
 	}
 
-	const rawBody = await response.text();
 	const contentType =
-		response.headers.get("Content-Type") ?? "";
-	const body = tryPrettyPrintJson(rawBody, contentType);
+		response.headers["Content-Type"] ?? response.headers["content-type"] ?? "";
+	const body = tryPrettyPrintJson(response.text, contentType);
 
 	return {
 		status: response.status,
-		statusText: response.statusText,
-		headers: headersToRecord(response.headers),
+		statusText: response.status >= 400 ? "Error" : "OK",
+		headers: response.headers,
 		body,
 	};
 }

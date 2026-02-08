@@ -14,7 +14,7 @@ export function registerHttpBlockProcessor(plugin: Plugin): void {
 			const button = buttonWrap.createEl("button", {
 				cls: "api-notebook-run-button",
 			});
-			button.setText("Run Request");
+			button.setText("Run request");
 
 			const outputContainer = el.createEl("div", {
 				cls: "api-notebook-output",
